@@ -64,7 +64,6 @@ class Activation(Layer):
     """
     Base class for activation functions.
     """
-
     def forward(self, inputs: Tensor) -> Tensor:
         """
         Forward pass through the activation function.
