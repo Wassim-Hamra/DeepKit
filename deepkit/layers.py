@@ -6,7 +6,8 @@ and propagate the gradients back to the previous layer.
 
 import numpy as np
 from deepkit.tensor import Tensor
-from typing import Dict
+from typing import Dict, Callable
+
 
 class Layer:
     def __init__(self,) -> None:
@@ -60,19 +61,54 @@ class Linear(Layer):
         return grad @ self.params["w"].T
 
 
+F = Callable([[Tensor], Tensor])
+
+
 class Activation(Layer):
     """
     Base class for activation functions.
     """
 
-    def forward(self, inputs: Tensor) -> Tensor:
-        """
-        Forward pass through the activation function.
-        """
-        raise NotImplementedError
+    def __init__(self, f: F, f_prime: F) -> None:
+        super().__init__()
+        self.f = f
+        self.f_prime = f_prime
 
-    def backward(self, grad: Tensor) -> Tensor:
+
+    def forward(self,inputs: Tensor) -> Tensor:
         """
-        Backward pass through the activation function.
+        Forward pass through the layer.
         """
-        raise NotImplementedError
+        self.inputs = inputs
+        return self.f(inputs)
+
+    def backward(self,grad: Tensor) -> Tensor:
+        """
+        Backward pass through the layer.
+        grad = grad * f_prime(inputs)
+        """
+        return grad * self.f_prime(self.inputs)
+
+
+
+def tanh(x: Tensor) -> Tensor:
+    """
+    Tanh activation function.
+    """
+    return np.tanh(x)
+
+
+def tanh_prime(x: Tensor) -> Tensor:
+    """
+    Derivative of the tanh activation function.
+    """
+    return 1 - tanh(x) ** 2
+
+
+class Tanh(Activation):
+    """
+    Tanh activation function layer.
+    """
+
+    def __init__(self) -> None:
+        super().__init__(f=tanh, f_prime=tanh_prime)
