@@ -61,7 +61,7 @@ class Linear(Layer):
         return grad @ self.params["w"].T
 
 
-F = Callable([[Tensor], Tensor])
+F = Callable[[Tensor], Tensor]
 
 
 class Activation(Layer):
